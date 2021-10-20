@@ -1,0 +1,179 @@
+#include <iostream>
+#include <fstream>
+#include <string.h>
+#include <stdio.h>
+#include <conio.h>
+using namespace std;
+class Employee
+{
+  string name;
+  int id {0};
+  int salary {0};
+public:
+  void add_new_record ()
+  {
+    cout << "Employee Details:-\n";
+    cout << "Name: ";
+    cin >> name;
+    cout << "ID: ";
+    cin >> id;
+    cout << "Salary: ";
+    cin >> salary;
+  }
+  void display_data ()
+  {
+    cout << "Name: " <<name << endl;
+    cout << "ID: " <<id << endl;
+    cout << "Salary: " <<salary << endl;
+  }
+  void create_file ()		
+  {
+    ofstream out;
+    out.open ("employees.txt", ios::app);
+    out.write ((char *) this, sizeof (*this));
+    out.close ();
+  }
+  void view_data ()		
+  {
+    ifstream fin ("employees.txt");
+    if (!fin)
+      cout << "File not found\n";
+    else
+      {
+	fin.read ((char *) this, sizeof (*this));
+	while (!fin.eof ())
+	  {
+	    display_data ();
+	    fin.read ((char *) this, sizeof (*this));
+	  }
+      }
+  }
+  void search_record (string t)	
+  {
+    int c = 0;
+    ifstream fin ("employees.txt");
+    if (!fin)
+      cout << "File not found\n";
+    else
+      {
+
+	fin.read ((char *) this, sizeof (*this));
+	while (!fin.eof ())
+	  {
+	    if (!(t.compare (name)))
+	      {
+		display_data ();
+		c++;
+	      }
+	    fin.read ((char *) this, sizeof (*this));
+	  }
+	if (c == 0)
+	  {
+	    cout << "Error\n";
+	    cout << "Record not found\n";
+	  }
+	fin.close ();
+      }
+  }
+  void delete_record (string t)	
+  {
+    ifstream fin ("employees.txt");
+    if (!fin)
+      cout << "File not found\n";
+    else
+      {
+	ofstream out ("subs.txt");
+	fin.read ((char *) this, sizeof (*this));
+	while (!fin.eof ())
+	  {
+	    if ((t.compare (name)))
+	      {
+		out.write ((char *) this, sizeof (*this));
+	      }
+	    fin.read ((char *) this, sizeof (*this));
+	  }
+	fin.close ();
+	out.close ();
+	remove ("employees.txt");
+	rename ("subs.txt", "employees.txt");
+      }
+  }
+  void modify_record (string t)
+  {
+    fstream fin ("employees.txt");
+    fin.seekg (0);
+    fin.read ((char *) this, sizeof (*this));
+    while (!fin.eof ())
+      {
+	if (!(t.compare (name)))
+	  {
+	    add_new_record ();
+	    fin.seekp (fin.tellp () - sizeof (*this));
+	    fin.write ((char *) this, sizeof (*this));
+	  }
+	fin.read ((char *) this, sizeof (*this));
+      }
+    fin.close ();
+  }
+};
+
+int
+menu ()
+{
+  int choice;
+  cout << "\n\n Employee details:-\n";
+  cout << "\n1. Add Employee details";
+  cout << "\n2. Display Employee details";
+  cout << "\n3. Search Employee Record";
+  cout << "\n4. Delete Employee Record";
+  cout << "\n5. Modify Employee Record";
+  cout << "\n0. Exit";
+  cout << "\n\nEnter your choice: ";
+  cin >> choice;
+  return choice;
+}
+
+int
+main ()
+{
+  string n;
+  Employee e1;
+  while (true)
+    {
+      system ("cls");
+      switch (menu ())
+	{
+	case 1:
+	  e1.add_new_record ();
+	  e1.create_file ();
+	  cout << "\nRecord Added";
+	  break;
+	case 2:
+	  e1.view_data ();
+	  break;
+	case 3:
+	  cout << "Name of the employee to be searched: ";
+	  cin >> n;
+	  e1.search_record (n);
+	  break;
+	case 4:
+	  cout << "Name of the employee whose record will be deleted: ";
+	  cin >> n;
+	  e1.delete_record (n);
+	  break;
+	case 5:
+	  cout << "Name of the employee whose record will be modified: ";
+	  cin.ignore ();
+	  cin >> n;
+	  e1.modify_record (n);
+	  break;
+	case 0:
+	  cout << "\nThank you!";
+	  getch ();
+	  exit (0);
+	default:
+	  cout << "\nInvalid Choice";
+	}
+      getch ();
+    }
+}
